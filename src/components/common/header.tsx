@@ -24,7 +24,7 @@ export const Header = () => {
   return (
     <header className="flex items-center justify-between p-5">
       <Link href="/">
-        <Image src="/logo.svg" alt="BEWEAR" width={350} height={37} />
+        <Image src="/logo.svg" alt="BEWEAR" width={300} height={37} />
       </Link>
 
       <div className="flex items-center">
