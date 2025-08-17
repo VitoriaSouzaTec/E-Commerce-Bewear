@@ -16,15 +16,13 @@ const AddToCartButton = ({
   quantity,
 }: AddToCartButtonProps) => {
   const queryClient = useQueryClient();
-  
   const { mutate, isPending } = useMutation({
     mutationKey: ["addProductToCart", productVariantId, quantity],
-    mutationFn: async () => {
-      await addProductToCart({
+    mutationFn: () =>
+      addProductToCart({
         productVariantId,
         quantity,
-      });
-    },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
@@ -38,10 +36,11 @@ const AddToCartButton = ({
       disabled={isPending}
       onClick={() => mutate()}
     >
-      {isPending ? (
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      ) : null}
-      Adicionar à sacola
+      {/* Mantém um span fixo para evitar troca abrupta de nós */}
+      <span className="flex items-center gap-2">
+        {isPending && <Loader2 className="animate-spin" />}
+        Adicionar à sacola
+      </span>
     </Button>
   );
 };

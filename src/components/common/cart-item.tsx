@@ -1,92 +1,105 @@
-"use client";
-
-import { useQuery } from "@tanstack/react-query";
-import { ShoppingBasketIcon } from "lucide-react";
+import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
 
-import { getCart } from "@/actions/get-cart";
-import { Button } from "@/components/ui/button";
 import { formatCentsToBRL } from "@/helpers/money";
+import { useDecreaseCartProduct } from "@/hooks/mutations/use-decrease-cart-product";
+import { useIncreaseCartProduct } from "@/hooks/mutations/use-increase-cart-product";
+import { useRemoveProductFromCart } from "@/hooks/mutations/use-remove-product-from-cart";
 
-import { ScrollArea } from "../ui/scroll-area";
-import { Separator } from "../ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "../ui/sheet";
-import CartItem from "./cart-item";
+import { Button } from "../ui/button";
 
-export const Cart = () => {
-  const { data: cart, isPending: cartIsLoading } = useQuery({
-    queryKey: ["cart"],
-    queryFn: () => getCart(),
-  });
+interface CartItemProps {
+  id: string;
+  productName: string;
+  productVariantId: string;
+  productVariantName: string;
+  productVariantImageUrl: string;
+  productVariantPriceInCents: number;
+  quantity: number;
+}
+
+const CartItem = ({
+  id,
+  productName,
+  productVariantId,
+  productVariantName,
+  productVariantImageUrl,
+  productVariantPriceInCents,
+  quantity,
+}: CartItemProps) => {
+  const removeProductFromCartMutation = useRemoveProductFromCart(id);
+  const decreaseCartProductQuantityMutation = useDecreaseCartProduct(id);
+  const increaseCartProductQuantityMutation =
+    useIncreaseCartProduct(productVariantId);
+  const handleDeleteClick = () => {
+    removeProductFromCartMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("Produto removido do carrinho.");
+      },
+      onError: () => {
+        toast.error("Erro ao remover produto do carrinho.");
+      },
+    });
+  };
+  const handleDecreaseQuantityClick = () => {
+    decreaseCartProductQuantityMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("Quantidade do produto diminuida.");
+      },
+    });
+  };
+  const handleIncreaseQuantityClick = () => {
+    increaseCartProductQuantityMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("Quantidade do produto aumentada.");
+      },
+    });
+  };
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="icon">
-          <ShoppingBasketIcon />
-        </Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Carrinho</SheetTitle>
-        </SheetHeader>
-
-        <div className="flex h-full flex-col px-5 pb-5">
-          <div className="flex h-full max-h-full flex-col overflow-hidden">
-            <ScrollArea className="h-full">
-              <div className="flex h-full flex-col gap-8">
-                {cart?.items.map((item) => (
-                  <CartItem
-                    key={item.id}
-                    id={item.id}
-                    productName={item.productVariant.product.name}
-                    productVariantName={item.productVariant.name}
-                    productVariantImageUrl={item.productVariant.imageUrl}
-                    productVariantPriceInCents={
-                      item.productVariant.priceInCents
-                    }
-                    quantity={item.quantity}
-                  />
-                ))}
-              </div>
-            </ScrollArea>
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <Image
+          src={productVariantImageUrl}
+          alt={productVariantName}
+          width={78}
+          height={78}
+          className="rounded-lg"
+        />
+        <div className="flex flex-col gap-1">
+          <p className="text-sm font-semibold">{productName}</p>
+          <p className="text-muted-foreground text-xs font-medium">
+            {productVariantName}
+          </p>
+          <div className="flex w-[100px] items-center justify-between rounded-lg border p-1">
+            <Button
+              className="h-4 w-4"
+              variant="ghost"
+              onClick={handleDecreaseQuantityClick}
+            >
+              <MinusIcon />
+            </Button>
+            <p className="text-xs font-medium">{quantity}</p>
+            <Button
+              className="h-4 w-4"
+              variant="ghost"
+              onClick={handleIncreaseQuantityClick}
+            >
+              <PlusIcon />
+            </Button>
           </div>
-
-          {cart?.items && cart?.items.length > 0 && (
-            <div className="flex flex-col gap-4">
-              <Separator />
-
-              <div className="flex items-center justify-between text-xs font-medium">
-                <p>Subtotal</p>
-                <p>{formatCentsToBRL(cart?.totalPriceInCents ?? 0)}</p>
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between text-xs font-medium">
-                <p>Entrega</p>
-                <p>GRÁTIS</p>
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between text-xs font-medium">
-                <p>Total</p>
-                <p>{formatCentsToBRL(cart?.totalPriceInCents ?? 0)}</p>
-              </div>
-
-              <Button className="mt-5 rounded-full">Finalizar compra</Button>
-            </div>
-          )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+      <div className="flex flex-col items-end justify-center gap-2">
+        <Button variant="outline" size="icon" onClick={handleDeleteClick}>
+          <TrashIcon />
+        </Button>
+        <p className="text-sm font-bold">
+          {formatCentsToBRL(productVariantPriceInCents)}
+        </p>
+      </div>
+    </div>
   );
 };
 
-// SERVER ACTION
+export default CartItem;
