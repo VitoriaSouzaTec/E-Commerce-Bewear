@@ -1,5 +1,6 @@
 "use client";
-
+// eslint-disable-next-line simple-import-sort/imports
+import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
@@ -16,17 +17,19 @@ const AddToCartButton = ({
   quantity,
 }: AddToCartButtonProps) => {
   const queryClient = useQueryClient();
-  
   const { mutate, isPending } = useMutation({
     mutationKey: ["addProductToCart", productVariantId, quantity],
-    mutationFn: async () => {
-      await addProductToCart({
+    mutationFn: () =>
+      addProductToCart({
         productVariantId,
         quantity,
-      });
-    },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
+       toast.success("Produto adicionado ao carrinho!");
+    },
+    onError: () => {
+      toast.error("Ocorreu um erro ao adicionar o produto.");
     },
   });
 
@@ -37,11 +40,13 @@ const AddToCartButton = ({
       variant="outline"
       disabled={isPending}
       onClick={() => mutate()}
+      data-testid="add-to-cart-button" 
     >
-      {isPending ? (
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      ) : null}
-      Adicionar à sacola
+      {/* Mantém um span fixo para evitar troca abrupta de nós */}
+      <span className="flex items-center gap-2">
+        {isPending && <Loader2 className="animate-spin" />}
+        Adicionar à sacola
+      </span>
     </Button>
   );
 };
