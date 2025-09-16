@@ -27,7 +27,7 @@ export const Header = () => {
         <Image
           src="/logo.svg"
           alt="BEWEAR"
-          width={300}
+          width={100}
           height={26.14}
           priority
         />

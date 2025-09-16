@@ -1,5 +1,6 @@
 "use client";
-
+// eslint-disable-next-line simple-import-sort/imports
+import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
@@ -25,6 +26,10 @@ const AddToCartButton = ({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
+       toast.success("Produto adicionado ao carrinho!");
+    },
+    onError: () => {
+      toast.error("Ocorreu um erro ao adicionar o produto.");
     },
   });
 
@@ -35,6 +40,7 @@ const AddToCartButton = ({
       variant="outline"
       disabled={isPending}
       onClick={() => mutate()}
+      data-testid="add-to-cart-button" 
     >
       {/* Mantém um span fixo para evitar troca abrupta de nós */}
       <span className="flex items-center gap-2">
