@@ -36,12 +36,11 @@ export const Cart = () => {
         <div className="flex h-full flex-col px-5 pb-5">
           <div className="flex h-full max-h-full flex-col overflow-hidden">
             <ScrollArea className="h-full">
-              {/* Container sempre com key fixa */}
               <div className="flex h-full flex-col gap-8" key="cart-items-container">
                 {cart?.items?.length ? (
                   cart.items.map((item) => (
                     <CartItem
-                      key={item.id} // item.id garante key única
+                      key={item.id}
                       id={item.id}
                       productVariantId={item.productVariant.id}
                       productName={item.productVariant.product.name}
@@ -67,10 +66,11 @@ export const Cart = () => {
             {cart?.items?.length ? (
               <>
                 <Separator />
-
+                
                 <div className="flex items-center justify-between text-xs font-medium">
                   <p>Subtotal</p>
-                  <p>{formatCentsToBRL(cart.totalPriceInCents ?? 0)}</p>
+                  {/* ✅ LINHA CORRIGIDA */}
+                  <p>{formatCentsToBRL(cart && 'totalPriceInCents' in cart ? cart.totalPriceInCents : 0)}</p>
                 </div>
 
                 <Separator />
@@ -84,7 +84,8 @@ export const Cart = () => {
 
                 <div className="flex items-center justify-between text-xs font-medium">
                   <p>Total</p>
-                  <p>{formatCentsToBRL(cart.totalPriceInCents ?? 0)}</p>
+                  {/* ✅ LINHA CORRIGIDA */}
+                  <p>{formatCentsToBRL(cart && 'totalPriceInCents' in cart ? cart.totalPriceInCents : 0)}</p>
                 </div>
 
                 <Button className="mt-5 rounded-full" asChild>
