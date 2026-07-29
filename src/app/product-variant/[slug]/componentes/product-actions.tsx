@@ -1,7 +1,7 @@
 "use client";
 
 // eslint-disable-next-line simple-import-sort/imports
-import { MinusIcon, PlusIcon, Loader2 } from "lucide-react";
+import { MinusIcon, PlusIcon, Loader2, LogInIcon } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import AddToCartButton from "./add-to-cart-button";
 
 interface ProductActionsProps {
   productVariantId: string;
+
 }
 
 const ProductActions = ({ productVariantId }: ProductActionsProps) => {
@@ -21,24 +22,36 @@ const ProductActions = ({ productVariantId }: ProductActionsProps) => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  // 1. Crie uma nova mutação para o botão "Comprar agora"
   const { mutate, isPending } = useMutation({
-    mutationKey: ["addProductToCart", productVariantId, quantity],
-    mutationFn: () =>
-      addProductToCart({
-        productVariantId,
-        quantity,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-      toast.success("Produto adicionado! Redirecionando para o carrinho...");
-      // 2. Redireciona para o checkout APÓS o sucesso da mutação
-      router.push("/cart/identification"); 
-    },
-    onError: () => {
-      toast.error("Ocorreu um erro ao adicionar o produto.");
-    },
-  });
+  mutationKey: ["addProductToCart", productVariantId, quantity],
+  mutationFn: () =>
+    addProductToCart({
+      productVariantId,
+      quantity,
+    }),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["cart"] });
+    toast.success("Produto adicionado! Redirecionando para o carrinho...");
+    router.push("/cart/identification");
+  },
+  onError: (error) => {
+    if (error instanceof Error && error.message === "UNAUTHENTICATED") {
+      toast.error("Você precisa fazer login para comprar", {
+        description: "Faça login na sua conta para continuar com a compra.",
+        
+        icon: <LogInIcon className="h-4 w-4" />,
+        action: {
+          label: "Fazer login",
+          onClick: () => router.push("/authentication"),
+        },
+        duration: 5000,
+      });
+      router.push("/authentication");
+      return;
+    }
+    toast.error("Ocorreu um erro ao adicionar o produto.");
+  },
+});
 
   const handleDecrement = () => {
     setQuantity((prev) => (prev > 1 ? prev - 1 : prev));
@@ -47,10 +60,9 @@ const ProductActions = ({ productVariantId }: ProductActionsProps) => {
   const handleIncrement = () => {
     setQuantity((prev) => prev + 1);
   };
-  
-  // A função para o botão "Comprar agora"
+
   const handleBuyNow = () => {
-    mutate(); // Inicia a mutação
+    mutate();
   };
 
   return (
@@ -74,11 +86,11 @@ const ProductActions = ({ productVariantId }: ProductActionsProps) => {
           productVariantId={productVariantId}
           quantity={quantity}
         />
-        <Button 
-          className="rounded-full" 
+        <Button
+          className="rounded-full"
           size="lg"
           onClick={handleBuyNow}
-          disabled={isPending} // Desabilita o botão enquanto a ação está pendente
+          disabled={isPending}
         >
           <span className="flex items-center gap-2">
             {isPending && <Loader2 className="animate-spin" />}

@@ -27,7 +27,6 @@ const Home = async () => {
   return (
     <>
       <Header />
-      {/* ✅ Contêiner principal para desktop, limita a largura e centraliza */}
       <div className="space-y-6 md:space-y-12 max-w-7xl mx-auto md:px-8">
         <div className="px-5 md:px-0">
           <Image

@@ -15,7 +15,7 @@ export const addProductToCart = async (data: AddProductToCartSchema) => {
     headers: await headers(),
   });
   if (!session?.user) {
-    throw new Error("Unauthorized");
+    throw new Error("UNAUTHENTICATED"); 
   }
   const productVariant = await db.query.productVariantTable.findFirst({
     where: (productVariant, { eq }) =>

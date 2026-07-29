@@ -4,7 +4,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SignInForm from "./components/sign-in-form";
 import SignUpForm from "./components/sign-up-form";
 
-const Authentication = async () => {
+interface AuthenticationProps {
+  searchParams: Promise<{ redirect?: string }>;
+}
+
+const Authentication = async ({ searchParams }: AuthenticationProps) => {
+  const { redirect } = await searchParams;
+
   return (
     <>
       <Header />
@@ -16,10 +22,10 @@ const Authentication = async () => {
             <TabsTrigger value="sign-up">Criar conta</TabsTrigger>
           </TabsList>
           <TabsContent value="sign-in" className="w-full">
-            <SignInForm />
+            <SignInForm redirectTo={redirect} />
           </TabsContent>
           <TabsContent value="sign-up" className="w-full">
-            <SignUpForm />
+            <SignUpForm redirectTo={redirect} />
           </TabsContent>
         </Tabs>
       </div>

@@ -33,7 +33,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const SignInForm = () => {
+interface SignInFormProps {
+  redirectTo?: string;
+}
+
+const SignInForm = ({ redirectTo }: SignInFormProps) => {
   const router = useRouter();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -49,7 +53,7 @@ const SignInForm = () => {
       password: values.password,
       fetchOptions: {
         onSuccess: () => {
-          router.push("/");
+          router.push(redirectTo || "/");
         },
         onError: (ctx) => {
           if (ctx.error.code === "USER_NOT_FOUND") {
@@ -76,6 +80,7 @@ const SignInForm = () => {
   const handleSignInWithGoogle = async () => {
     await authClient.signIn.social({
       provider: "google",
+      callbackURL: redirectTo || "/",
     });
   };
   return (
